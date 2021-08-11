@@ -676,43 +676,102 @@ ce_cp_acc = ce_cp_acc + theme(axis.title.y = element_blank())
 #final accuracy plot
 sw_sp_acc + sc_sp_acc + sw_cp_acc + sc_cp_acc + cn_sp_acc + ce_sp_acc + cn_cp_acc + ce_cp_acc  + plot_layout(design = layout)
 
-switch_RT2 <- df_trimmed %>% 
+###Reaction Time (RT) Means 
+
+omni_df <- df_trimmed %>% 
+  group_by(subject, switchType, stimCongruency, switch_perc, congruency_perc) %>% 
+  summarise(mean_RT = mean(RT,na.rm = TRUE))
+
+#mean switch type RT
+switchType_mean <- omni_df %>% 
+  group_by(switchType) %>% 
+  summarise(mean = mean(mean_RT,na.rm = TRUE), se = std.error(mean_RT)) %>% 
+  mutate(upper_95 = mean + 1.96*se,
+         lower_95 = mean - 1.96*se)
+
+#mean congruency effect RT
+congruency_mean <- omni_df %>% 
+  group_by(stimCongruency) %>% 
+  summarise(mean = mean(mean_RT,na.rm = TRUE), se = std.error(mean_RT)) %>% 
+  mutate(upper_95 = mean + 1.96*se,
+         lower_95 = mean - 1.96*se)
+
+#mean switch costs RT by switch percentage
+switchCost_mean1 <- omni_df %>% 
   group_by(subject, switch_perc, switchType) %>% 
-  summarise(mean_RT = mean(RT,na.rm = TRUE))
+  summarise(mean = mean(mean_RT))
 
-switch_cost2 <- switch_RT2 %>% 
+switchCost_mean2 <- switchCost_mean1 %>% 
   group_by(subject, switch_perc) %>% 
-  summarise(switch_cost = mean_RT[2] - mean_RT[1])
+  summarise(switch_cost = mean[2] - mean[1])
 
-switch_cost2_mean <- switch_cost2 %>% 
+switch_perc_mean <- switchCost_mean2 %>% 
   group_by(switch_perc) %>% 
-  summarise(mean_sc = mean(switch_cost, na.rm = TRUE))
+  summarise(mean_sc = mean(switch_cost), se = std.error(switch_cost)) %>% 
+  mutate(upper_95 = mean_sc + 1.96*se,
+         lower_95 = mean_sc - 1.96*se)
 
-ps_effect <- switch_cost2 %>% 
-  group_by(subject) %>% 
-  summarise(ps_effect = switch_cost[1] - switch_cost[2])
-
-congruency_RT2 <- df_trimmed %>% 
+#mean congruency effect RT by congruency percantage
+congruencyEffect_mean1 <- omni_df %>% 
   group_by(subject, congruency_perc, stimCongruency) %>% 
-  summarise(mean_RT = mean(RT,na.rm = TRUE))
+  summarise(mean = mean(mean_RT))
 
-congruency_effect2 <- congruency_RT2 %>% 
+congruencyEffect_mean2 <- congruencyEffect_mean1 %>% 
   group_by(subject, congruency_perc) %>% 
-  summarise(congruency_effect = mean_RT[2] - mean_RT[1])
+  summarise(congruency_effect = mean[2] - mean[1])
 
-congruency_effect2_mean <- congruency_effect2 %>% 
+congruency_perc_mean <- congruencyEffect_mean2 %>% 
   group_by(congruency_perc) %>% 
-  summarise(mean_ce = mean(congruency_effect, na.rm = TRUE))
+  summarise(mean_ce = mean(congruency_effect), se = std.error(congruency_effect)) %>% 
+  mutate(upper_95 = mean_ce + 1.96*se,
+         lower_95 = mean_ce - 1.96*se)
 
-pc_effect <- congruency_effect2 %>% 
-  group_by(subject) %>% 
-  summarise(pc_effect = congruency_effect[1] - congruency_effect[2])
 
-effects <- ps_effect
-effects$pc_effect <- pc_effect$pc_effect
-write.csv(effects, 'CTI_effects.csv')
+###Accuracy (Acc) Means
+omni_df_acc <- df %>% 
+  group_by(subject, switchType, stimCongruency, switch_perc, congruency_perc) %>% 
+  summarise(mean_acc = mean(acc,na.rm = TRUE))
 
-block_effects <- df_trimmed %>% 
-  group_by(blockType) %>% 
-  summarise(mean_RT = mean(RT,na.rm = TRUE), sd_RT =  sd(RT,na.rm = TRUE))
-describe(block_effects)
+#mean switch type acc
+switchType_mean <- omni_df_acc %>% 
+  group_by(switchType) %>% 
+  summarise(mean = mean(mean_acc,na.rm = TRUE), se = std.error(mean_acc)) %>% 
+  mutate(upper_95 = mean + 1.96*se,
+         lower_95 = mean - 1.96*se)
+
+#mean congruency effect acc
+congruency_mean <- omni_df_acc %>% 
+  group_by(stimCongruency) %>% 
+  summarise(mean = mean(mean_acc,na.rm = TRUE), se = std.error(mean_acc)) %>% 
+  mutate(upper_95 = mean + 1.96*se,
+         lower_95 = mean - 1.96*se)
+
+#mean switch costs acc by switch percentage
+switchCost_mean1 <- omni_df_acc %>% 
+  group_by(subject, stimCongruency, switchType) %>% 
+  summarise(mean = mean(mean_acc))
+
+switchCost_mean2 <- switchCost_mean1 %>% 
+  group_by(subject, stimCongruency) %>% 
+  summarise(switch_cost = mean[1] - mean[2])
+
+switch_perc_mean <- switchCost_mean2 %>% 
+  group_by(stimCongruency) %>% 
+  summarise(mean_sc = mean(switch_cost), se = std.error(switch_cost)) %>% 
+  mutate(upper_95 = mean_sc + 1.96*se,
+         lower_95 = mean_sc - 1.96*se)
+
+#mean congruency effect acc by congruency percantage
+congruencyEffect_mean1 <- omni_df_acc %>% 
+  group_by(subject, congruency_perc, stimCongruency) %>% 
+  summarise(mean = mean(mean_acc))
+
+congruencyEffect_mean2 <- congruencyEffect_mean1 %>% 
+  group_by(subject, congruency_perc) %>% 
+  summarise(congruency_effect = mean[1] - mean[2])
+
+congruency_perc_mean <- congruencyEffect_mean2 %>% 
+  group_by(congruency_perc) %>% 
+  summarise(mean_ce = mean(congruency_effect), se = std.error(congruency_effect)) %>% 
+  mutate(upper_95 = mean_ce + 1.96*se,
+         lower_95 = mean_ce - 1.96*se)
