@@ -188,7 +188,7 @@ function createTargetBatch(){
 
   // shuffle targets
   do {
-    shuffle(targetArr);
+    targetArr = shuffle(targetArr);
   } while (targetRepeats(targetArr));
   return targetArr;
 

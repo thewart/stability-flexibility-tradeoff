@@ -105,7 +105,7 @@ function createTargetBatch(){
 
   // shuffle targets
   do {
-    shuffle(targets);
+    targets = shuffle(targets);
   } while (targetArrNotOk(targets));
 
   return targets;
