@@ -7,9 +7,9 @@ library(plotrix)
 library(patchwork)
 
 #load data
-path <-  "C:/..."
-file <- "combinedData.csv"
-df <- read_csv(paste(path,file,sep=""))
+path <-  "../Participant Data/Experiment 1"
+file <- "combinedData_Exp1.csv"
+df <- read_csv(file.path(path,file))
 
 #filter out unimportant trials
 df <- df %>% 
